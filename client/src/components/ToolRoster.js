@@ -1,8 +1,9 @@
+// ToolRoster.js
 import React, { useState } from "react";
 import ToolForm from "./ToolForm";
 import CategoryForm from "./CategoryForm"; // Import the CategoryForm
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteTool } from '../slices/toolSlice';
+import { deleteTool, exportTools } from '../slices/toolSlice';
 import ToolCard from "./ToolCard"; // Ensure this import remains for handling tool operations
 
 function ToolRoster() {
@@ -15,6 +16,10 @@ function ToolRoster() {
     dispatch(deleteTool(toolId));
   };
 
+  const handleExport = () => {
+    dispatch(exportTools());
+  };
+
   const filteredTools = tools.filter(tool => 
     tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,21 +28,9 @@ function ToolRoster() {
     tool.serial.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const toolsByCategory = filteredTools.reduce((acc, tool) => {
-    const categoryKey = tool.category.id;
-    if (!acc[categoryKey]) {
-      acc[categoryKey] = {
-        tools: [],
-        categoryName: tool.category.name
-      };
-    }
-    acc[categoryKey].tools.push(tool);
-    return acc;
-  }, {});
-
   return (
     <div className="w-full p-4">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between">
         <input
           type="text"
           className="input input-bordered w-full max-w-xs"
@@ -45,32 +38,28 @@ function ToolRoster() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        <button onClick={handleExport} className="btn btn-secondary ml-2">Export Data</button>
       </div>
       <button onClick={() => setIsModalOpen(true)} className="btn btn-primary mb-4">Add New Asset</button>
-      {Object.entries(toolsByCategory).map(([categoryKey, { tools, categoryName }]) => (
-        <div key={categoryKey} className="mb-6">
-          <h2 className="text-2xl font-bold mb-5">{categoryName}</h2>
-          <div className="overflow-x-auto">
-            <table className="table-auto w-full">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 w-1/6">Name</th>
-                  <th className="px-4 py-2 w-1/3">Description</th>
-                  <th className="px-4 py-2 w-1/6">Category</th>
-                  <th className="px-4 py-2 w-1/6">Status</th>
-                  <th className="px-4 py-2 w-1/6">Serial</th>
-                  <th className="px-4 py-2 text-center w-1/6">Actions</th> {/* Center-aligned */}
-                </tr>
-              </thead>
-              <tbody>
-                {tools.map(tool => (
-                  <ToolCard key={tool.id} tool={tool} handleDelete={() => handleDelete(tool.id)} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 w-1/6">Name</th>
+              <th className="px-4 py-2 w-1/3">Description</th>
+              <th className="px-4 py-2 w-1/6">Category</th>
+              <th className="px-4 py-2 w-1/6">Status</th>
+              <th className="px-4 py-2 w-1/6">Serial</th>
+              <th className="px-4 py-2 text-center w-1/6">Actions</th> {/* Center-aligned */}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTools.map(tool => (
+              <ToolCard key={tool.id} tool={tool} handleDelete={() => handleDelete(tool.id)} />
+            ))}
+          </tbody>
+        </table>
+      </div>
       {isModalOpen && (
         <div style={{
           position: 'fixed',

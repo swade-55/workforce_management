@@ -9,7 +9,8 @@ app = Flask(__name__)
 secret_key = secrets.token_hex(16)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory_management.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory_management.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_username:your_password@localhost:5432/inventory_management'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secret_key
 

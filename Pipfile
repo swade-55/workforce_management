@@ -16,6 +16,8 @@ pulp = "*"
 pandas = "*"
 scipy = "*"
 authlib = "*"
+psycopg2-binary = "*"
+openpyxl = "*"
 
 [requires]
 python_full_version = "3.8.13"

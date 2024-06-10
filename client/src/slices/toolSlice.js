@@ -153,6 +153,34 @@ export const fetchCategories = createAsyncThunk('data/fetchCategories', async ()
   return data;
 });
 
+export const exportTools = createAsyncThunk(
+  'tools/exportTools',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/export/tools', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to export data');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tools_export.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const toolSlice = createSlice({
   name: 'tools',
@@ -207,6 +235,9 @@ const toolSlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload;
+      })
+      .addCase(exportTools.fulfilled, (state) => {
+        state.status = 'succeeded';
       })
       ;
   },

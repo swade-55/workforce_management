@@ -1,6 +1,6 @@
 from config import *
 
-from flask import request, jsonify
+from flask import request, jsonify, send_file
 from models import db,Tool, Category
 from config import app
 from pulp import *
@@ -14,6 +14,8 @@ from flask_cors import CORS
 
 from routes.routes import *
 
+import pandas as pd
+from io import BytesIO
 
 @app.route('/tools_details', methods=['GET'])
 def get_tools_details():
@@ -130,6 +132,37 @@ def fetch_categories():
     categories = Category.query.all()
 
     return jsonify([category.to_dict() for category in categories]), 200
+
+
+@app.route('/export/tools', methods=['GET'])
+def export_tools():
+    tools = Tool.query.all()
+    tools_data = [
+        {
+            'ID': tool.id,
+            'Name': tool.name,
+            'Description': tool.description,
+            'Category': tool.category.name if tool.category else None,
+            'Status': tool.status,
+            'Serial': tool.serial,
+            'Model': tool.model,
+            'Product ID': tool.productId,
+            'Location': tool.location
+        }
+        for tool in tools
+    ]
+    df = pd.DataFrame(tools_data)
+    excel_file = BytesIO()
+    with pd.ExcelWriter(excel_file, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Tools')
+    excel_file.seek(0)
+    return send_file(
+        excel_file,
+        as_attachment=True,
+        download_name='tools_export.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 
 
 if __name__=='__main__':

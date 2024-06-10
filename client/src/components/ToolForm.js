@@ -12,7 +12,7 @@ function ToolForm({ onClose }) {
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     category_id: Yup.number().required('Category is required'),
-    serial: Yup.string().required('Serial is required'),
+    serial: Yup.number().required('Serial is required'),
     description: Yup.string().required('Description is required'),
     model: Yup.string().required('Model is required'),
     status: Yup.string().required('Status is required'),
