@@ -4,14 +4,18 @@ from flask_migrate import Migrate
 from models import db
 import secrets
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../client/build')
 
 secret_key = secrets.token_hex(16)
 
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory_management.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_username:your_password@localhost:5432/inventory_management'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_username:your_password@localhost:5432/inventory_management'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://your_username:your_password@localhost:5432/inventory_management')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 app.config['SECRET_KEY'] = secret_key
 
 migrate = Migrate(app,db)

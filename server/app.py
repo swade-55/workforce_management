@@ -1,6 +1,6 @@
 from config import *
 
-from flask import request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from models import db,Tool, Category
 from config import app
 from pulp import *
@@ -16,6 +16,16 @@ from routes.routes import *
 
 import pandas as pd
 from io import BytesIO
+
+
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/tools_details', methods=['GET'])
 def get_tools_details():
