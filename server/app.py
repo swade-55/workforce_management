@@ -1,7 +1,7 @@
 from config import *
 
 from flask import Flask, request, jsonify, send_file, send_from_directory
-from models import db,Tool, Category
+from models import db,Tool, Category, Reservation, TestLine
 from config import app
 from pulp import *
 import pulp
@@ -11,11 +11,79 @@ import numpy as np
 from collections import defaultdict
 from datetime import datetime
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 from routes.routes import *
 
 import pandas as pd
 from io import BytesIO
+
+@app.route('/testlines', methods=['GET'])
+def get_testlines():
+    testlines = TestLine.query.all()
+    return jsonify([testline.to_dict() for testline in testlines]), 200
+
+@app.route('/add_testline', methods=['POST'])
+def add_testline():
+    data = request.get_json()
+
+    new_testline = TestLine(
+        name=data.get('name'),
+        status=data.get('status', 'available')
+    )
+
+    db.session.add(new_testline)
+    db.session.commit()
+
+    return jsonify(new_testline.to_dict()), 200
+
+
+@app.route('/reserve_testline', methods=['POST'])
+def reserve_testline():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    testline_id = data.get('testline_id')
+
+    user = User.query.get(user_id)
+    testline = TestLine.query.get(testline_id)
+
+    if not user or not testline:
+        return jsonify({'error': 'User or TestLine not found'}), 404
+
+    # Check if testline is already reserved by the same user
+    existing_reservation = Reservation.query.filter_by(user_id=user_id, testline_id=testline_id, end_time=None).first()
+    if existing_reservation:
+        return jsonify({'error': 'TestLine already reserved by this user'}), 400
+
+    # Check if testline is available
+    if testline.status != 'available':
+        return jsonify({'error': 'TestLine is not available'}), 400
+
+    # Create a new reservation
+    reservation = Reservation(user_id=user_id, testline_id=testline_id)
+    testline.status = 'checked out'
+
+    db.session.add(reservation)
+    db.session.commit()
+
+    return jsonify(reservation.to_dict()), 200
+
+@app.route('/return_testline', methods=['POST'])
+def return_testline():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    testline_id = data.get('testline_id')
+
+    reservation = Reservation.query.filter_by(user_id=user_id, testline_id=testline_id, end_time=None).first()
+    if not reservation:
+        return jsonify({'error': 'Reservation not found'}), 404
+
+    reservation.end_time = datetime.utcnow()
+    reservation.testline.status = 'available'
+
+    db.session.commit()
+
+    return jsonify({'message': 'TestLine returned successfully'}), 200
 
 @app.route('/tools_details', methods=['GET'])
 def get_tools_details():
@@ -162,6 +230,48 @@ def export_tools():
         download_name='tools_export.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+
+@app.route('/import/tools', methods=['POST'])
+def import_tools():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        
+        try:
+            # Read the Excel file
+            df = pd.read_excel(file_path)
+            
+            # Process the DataFrame and insert into the database
+            for index, row in df.iterrows():
+                tool = Tool(
+                    name=row['Name'],
+                    description=row['Description'],
+                    category_id=row['Category ID'],
+                    status=row['Status'],
+                    serial=row['Serial'],
+                    model=row['Model'],
+                    productId=row['Product ID'],
+                    location=row['Location']
+                )
+                db.session.add(tool)
+            db.session.commit()
+            return jsonify({'message': 'Data imported successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Invalid file format'}), 400
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'xlsx'}
 
 
 

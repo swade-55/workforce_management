@@ -1,9 +1,8 @@
-// ToolRoster.js
 import React, { useState } from "react";
 import ToolForm from "./ToolForm";
 import CategoryForm from "./CategoryForm"; // Import the CategoryForm
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteTool, exportTools } from '../slices/toolSlice';
+import { deleteTool, exportTools, importTools } from '../slices/toolSlice'; // Import the importTools action
 import ToolCard from "./ToolCard"; // Ensure this import remains for handling tool operations
 
 function ToolRoster() {
@@ -20,6 +19,13 @@ function ToolRoster() {
     dispatch(exportTools());
   };
 
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      dispatch(importTools(file));
+    }
+  };
+
   const filteredTools = tools.filter(tool => 
     tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,6 +33,18 @@ function ToolRoster() {
     tool.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.serial.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const toolsByCategory = filteredTools.reduce((acc, tool) => {
+    const categoryKey = tool.category.id;
+    if (!acc[categoryKey]) {
+      acc[categoryKey] = {
+        tools: [],
+        categoryName: tool.category.name
+      };
+    }
+    acc[categoryKey].tools.push(tool);
+    return acc;
+  }, {});
 
   return (
     <div className="w-full p-4">
@@ -38,7 +56,16 @@ function ToolRoster() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button onClick={handleExport} className="btn btn-secondary ml-2">Export Data</button>
+        <div>
+          <input
+            type="file"
+            className="hidden"
+            id="import-file"
+            onChange={handleImport}
+          />
+          <label htmlFor="import-file" className="btn btn-secondary ml-2">Import Data</label>
+          <button onClick={handleExport} className="btn btn-secondary ml-2">Export Data</button>
+        </div>
       </div>
       <button onClick={() => setIsModalOpen(true)} className="btn btn-primary mb-4">Add New Asset</button>
       <div className="overflow-x-auto">

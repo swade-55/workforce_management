@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import ToolRoster from './ToolRoster';
 import MasterOperatingPlan from './MasterOperatingPlan';
 import ExecutiveSummary from './ExecutiveSummary';
+import ManageTestLines from './ManageTestLines'; // Import ManageTestLines
+import ManageUsers from './ManageUsers'; // Import ManageUsers
 
 function HeroSection() {
     // State to control the visibility of the modal
@@ -50,7 +52,6 @@ function HeroSection() {
       </div>
     );
   }
-  
 
 function Layout() {
     const auth = useSelector((state) => state.auth);
@@ -75,23 +76,25 @@ function Layout() {
                 </button>
               </Link>
               <Link to="/manage-test-lines">
-                {/* <button className="btn btn-primary btn-lg p-5 text-xl flex justify-center items-center">Manage All Contacts</button> */}
                 <button
                   className="btn btn-primary btn-lg text-xl flex justify-center items-center"
-
                 >
                   Manage All Test Lines
                 </button>
               </Link>
-  
-              {/* <Link to="/manage-todo"><button className="btn btn-accent btn-lg p-4 text-xl">Manage All ToDo</button></Link> */}
+              <Link to="/manage-users">
+                <button
+                  className="btn btn-primary btn-lg text-xl flex justify-center items-center"
+                >
+                  Manage Users
+                </button>
+              </Link>
               {!auth.isAuthenticated ? (
                 <>
                   <Link to="/login"><button className="btn">Login</button></Link>
                   <Link to="/signup"><button className="btn">Signup</button></Link>
                 </>
               ) : (
-                // <button className="btn btn-info btn-lg p-5 text-xl"onClick={handleLogout}>Logout</button>
                 <button onClick={handleLogout}
                   className="btn btn-info btn-lg text-xl flex justify-center items-center"
                 >
@@ -101,7 +104,12 @@ function Layout() {
             </div>
           </div>
         </header>
-        <ExecutiveSummary />
+        <Routes>
+          <Route path="/masteroperatingplan" element={<MasterOperatingPlan />} />
+          <Route path="/manage-test-lines" element={<ManageTestLines />} />
+          <Route path="/manage-users" element={<ManageUsers />} />
+          <Route path="/" element={<ExecutiveSummary />} />
+        </Routes>
         <footer className="footer bg-base-300 text-base-content">
           <div className="items-center grid-flow-col">
             <p>© 2024 Nokia One Lab</p>
@@ -111,4 +119,4 @@ function Layout() {
     );
   }
 
-  export default Layout
+  export default Layout;

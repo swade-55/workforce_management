@@ -4,9 +4,102 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 const initialState = {
   tools: [],
   categories:[],
+  testlines: [],
+  reservations: [],
   status: 'idle',
   error: null,
 };
+
+// Async thunk action for adding a test line
+export const addTestLine = createAsyncThunk(
+  'testlines/addTestLine',
+  async (testlineData, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/add_testline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testlineData),
+      });
+
+      if (!response.ok) throw new Error('Server error!');
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      console.error('Error in addTestLine thunk:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Fetch testlines
+export const fetchTestLines = createAsyncThunk(
+  'testlines/fetchTestLines',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/testlines'); // Adjust your endpoint
+      if (!response.ok) throw new Error('Server error!');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error in fetchTestLines thunk:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk actions for reservations
+export const reserveTestLine = createAsyncThunk(
+  'tools/reserveTestLine',
+  async ({ user_id, testline_id }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/reserve_testline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id, testline_id }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to reserve testline');
+      }
+
+      const reservation = await response.json();
+      return reservation;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const returnTestLine = createAsyncThunk(
+  'tools/returnTestLine',
+  async ({ user_id, testline_id }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/return_testline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id, testline_id }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to return testline');
+      }
+
+      const message = await response.json();
+      return { testline_id, message };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk action for adding a tool
 export const addTool = createAsyncThunk(
   'tools/addTool',
@@ -181,6 +274,28 @@ export const exportTools = createAsyncThunk(
   }
 );
 
+export const importTools = createAsyncThunk(
+  'tools/importTools',
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/import/tools', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to import tools');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const toolSlice = createSlice({
   name: 'tools',
@@ -239,7 +354,36 @@ const toolSlice = createSlice({
       .addCase(exportTools.fulfilled, (state) => {
         state.status = 'succeeded';
       })
-      ;
+      .addCase(importTools.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        // Add the imported tools to the state
+        state.tools = [...state.tools, ...action.payload];
+      })
+      .addCase(reserveTestLine.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.reservations.push(action.payload);
+        const testline = state.testlines.find(t => t.id === action.payload.testline_id);
+        if (testline) {
+          testline.status = 'checked out';
+        }
+      })
+      .addCase(returnTestLine.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const reservation = state.reservations.find(r => r.testline_id === action.payload.testline_id && !r.end_time);
+        if (reservation) {
+          reservation.end_time = new Date().toISOString();
+        }
+        const testline = state.testlines.find(t => t.id === action.payload.testline_id);
+        if (testline) {
+          testline.status = 'available';
+        }
+      })
+      .addCase(addTestLine.fulfilled, (state, action) => {
+        state.testlines.push(action.payload);
+      })
+      .addCase(fetchTestLines.fulfilled, (state, action) => {
+        state.testlines = action.payload;
+      });
   },
 });
 

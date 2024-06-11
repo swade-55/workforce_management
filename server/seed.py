@@ -1,20 +1,24 @@
-from models import db, User, Tool, Category
-
+from models import db, User, Tool, Category, TestLine, Reservation
 from config import app
 import random
+from werkzeug.security import generate_password_hash
 
 def seed():
     with app.app_context():
         # Clear existing data
+        Reservation.query.delete()
+        TestLine.query.delete()
         Tool.query.delete()
         Category.query.delete()
         User.query.delete()
         db.session.commit()
 
-        # Create users
-        user1 = User(username='user1', password_hash='password1')
-        user2 = User(username='user2', password_hash='password2')
+        # Create users with roles
+        admin = User(username='admin', email='admin@example.com', password_hash=generate_password_hash('adminpass'), role='admin')
+        user1 = User(username='user1', email='user1@example.com', password_hash=generate_password_hash('password1'), role='user')
+        user2 = User(username='user2', email='user2@example.com', password_hash=generate_password_hash('password2'), role='user')
 
+        db.session.add(admin)
         db.session.add(user1)
         db.session.add(user2)
         db.session.commit()
@@ -44,6 +48,16 @@ def seed():
                 )
                 db.session.add(tool)
                 db.session.commit()
+
+        # Create test lines
+        testline_statuses = ['available', 'checked out']
+        for k in range(20):
+            testline = TestLine(
+                name=f'TestLine {k + 1}',
+                status=random.choice(testline_statuses)
+            )
+            db.session.add(testline)
+            db.session.commit()
 
 if __name__ == '__main__':
     seed()
