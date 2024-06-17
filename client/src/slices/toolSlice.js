@@ -15,7 +15,7 @@ export const addTestLine = createAsyncThunk(
   'testlines/addTestLine',
   async (testlineData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/add_testline', {
+      const response = await fetch('/api/add_testline', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export const fetchTestLines = createAsyncThunk(
   'testlines/fetchTestLines',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/testlines'); // Adjust your endpoint
+      const response = await fetch('/api/testlines'); // Adjust your endpoint
       if (!response.ok) throw new Error('Server error!');
       const data = await response.json();
       return data;
@@ -54,7 +54,7 @@ export const reserveTestLine = createAsyncThunk(
   'tools/reserveTestLine',
   async ({ user_id, testline_id }, { rejectWithValue }) => {
     try {
-      const response = await fetch('/reserve_testline', {
+      const response = await fetch('/api/reserve_testline', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export const returnTestLine = createAsyncThunk(
   'tools/returnTestLine',
   async ({ user_id, testline_id }, { rejectWithValue }) => {
     try {
-      const response = await fetch('/return_testline', {
+      const response = await fetch('/api/return_testline', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export const addTool = createAsyncThunk(
   'tools/addTool',
   async (toolData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/add_tool', {
+      const response = await fetch('/api/add_tool', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export const addTool = createAsyncThunk(
 
 export const deleteTool = createAsyncThunk('/tools/deletetool', async(toolId, {rejectWithValue}) =>{
   try {
-    const response = await fetch(`/tool_metrics/${toolId}`,{
+    const response = await fetch(`/api/tool_metrics/${toolId}`,{
       method:'DELETE',
     });
     if (!response.ok){
@@ -138,7 +138,7 @@ export const deleteTool = createAsyncThunk('/tools/deletetool', async(toolId, {r
 })
 
 export const fetchTools = createAsyncThunk('tools/fetchtools', async () => {
-  const url = `/tools_details`; 
+  const url = `/api/tools_details`; 
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -156,7 +156,7 @@ export const updateTool = createAsyncThunk(
     
     try {
       
-      const response = await fetch(`/update_tool/${toolData.toolId}`, {
+      const response = await fetch(`/api/update_tool/${toolData.toolId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ export const addCategory = createAsyncThunk(
   'data/addCategory',
   async (categoryData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/add_category', {
+      const response = await fetch('/api/add_category', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ export const deleteCategory = createAsyncThunk(
   'data/deleteCategory',
   async (categoryId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/categories/${categoryId}`, {
+      const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'DELETE',
       });
 
@@ -220,7 +220,7 @@ export const updateCategory = createAsyncThunk(
   'data/updateCategory',
   async (categoryData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/categories/${categoryData.id}`, {
+      const response = await fetch(`/api/categories/${categoryData.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -238,7 +238,7 @@ export const updateCategory = createAsyncThunk(
 );
 
 export const fetchCategories = createAsyncThunk('data/fetchCategories', async () => {
-  const response = await fetch('/get_categories');
+  const response = await fetch('/api/get_categories');
   if (!response.ok) {
     throw new Error('Could not fetch categories');
   }
@@ -250,7 +250,7 @@ export const exportTools = createAsyncThunk(
   'tools/exportTools',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/export/tools', {
+      const response = await fetch('/api/export/tools', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -278,7 +278,7 @@ export const importTools = createAsyncThunk(
   'tools/importTools',
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/import/tools', {
+      const response = await fetch('/api/import/tools', {
         method: 'POST',
         body: formData,
       });

@@ -8,7 +8,7 @@ def is_admin(user_id):
     user = User.query.get(user_id)
     return user and user.role == UserRole.ADMIN
 
-@app.route('/users', methods=['POST'])
+@app.route('/api/users', methods=['POST'])
 def add_user():
     data = request.get_json()
     if not is_admin(data.get('admin_id')):
@@ -28,7 +28,7 @@ def add_user():
 
     return jsonify(new_user.to_dict()), 200
 
-@app.route('/users/<int:user_id>', methods=['DELETE'])
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     data = request.get_json()
     if not is_admin(data.get('admin_id')):
@@ -43,7 +43,7 @@ def delete_user(user_id):
 
     return jsonify({'message': 'User deleted successfully'}), 200
 
-@app.route('/users/<int:user_id>', methods=['PATCH'])
+@app.route('/api/users/<int:user_id>', methods=['PATCH'])
 def update_user(user_id):
     data = request.get_json()
     if not is_admin(data.get('admin_id')):
@@ -68,13 +68,13 @@ def update_user(user_id):
 
     return jsonify(user.to_dict()), 200
 
-@app.route('/users', methods=['GET'])
+@app.route('/api/users', methods=['GET'])
 def fetch_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users]), 200
 
 
-@app.route('/users', methods=['POST'])
+@app.route('/api/users', methods=['POST'])
 def create_user():
     data = request.json
     username = data.get('username')
@@ -94,7 +94,7 @@ def create_user():
     return jsonify({"message": "Session valid", "user_id": new_user.id}), 201
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -106,22 +106,15 @@ def login():
         return jsonify({"message": "Invalid username or password"}), 401
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/api/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({"message": "Logged out successfully"}), 200
 
 
-# @app.route('/check_session', methods=['GET'])
-# def check_session():
-#     user_id = session.get('user_id')
-#     if user_id:
-#         return jsonify({"message": "Session valid", "user_id": user_id}), 200
-#     else:
-#         return jsonify({"message": "Session invalid"}), 401
 
 
-@app.route('/check_session', methods=['GET'])
+@app.route('/api/check_session', methods=['GET'])
 def check_session():
     user_id = session.get('user_id')
     if user_id:

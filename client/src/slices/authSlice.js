@@ -4,7 +4,7 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch('/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -21,7 +21,7 @@ export const loginUser = createAsyncThunk(
 
 export const checkSession = createAsyncThunk('auth/checkSession', async (_, thunkAPI) => {
     try {
-      const response = await fetch('/check_session', { credentials: 'include' });
+      const response = await fetch('/api/check_session', { credentials: 'include' });
       const data = await response.json();
       if (response.ok) {
         return { isAuthenticated: true, user: data.user };
@@ -35,7 +35,7 @@ export const checkSession = createAsyncThunk('auth/checkSession', async (_, thun
   
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, thunkAPI) => {
     try {
-      await fetch('/logout', { method: 'POST', credentials: 'include' });
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
       return { isAuthenticated: false };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -46,7 +46,7 @@ export const fetchUsers = createAsyncThunk(
   'auth/fetchUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/users');
+      const response = await fetch('/api/users');
       if (!response.ok) throw new Error('Server error!');
       const data = await response.json();
       return data;
@@ -61,7 +61,7 @@ export const addUser = createAsyncThunk(
   'auth/addUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/users', {
+      const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const deleteUser = createAsyncThunk(
   'auth/deleteUser',
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

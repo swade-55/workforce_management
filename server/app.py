@@ -18,12 +18,12 @@ from routes.routes import *
 import pandas as pd
 from io import BytesIO
 
-@app.route('/testlines', methods=['GET'])
+@app.route('/api/testlines', methods=['GET'])
 def get_testlines():
     testlines = TestLine.query.all()
     return jsonify([testline.to_dict() for testline in testlines]), 200
 
-@app.route('/add_testline', methods=['POST'])
+@app.route('/api/add_testline', methods=['POST'])
 def add_testline():
     data = request.get_json()
 
@@ -38,7 +38,7 @@ def add_testline():
     return jsonify(new_testline.to_dict()), 200
 
 
-@app.route('/reserve_testline', methods=['POST'])
+@app.route('/api/reserve_testline', methods=['POST'])
 def reserve_testline():
     data = request.get_json()
     user_id = data.get('user_id')
@@ -68,7 +68,7 @@ def reserve_testline():
 
     return jsonify(reservation.to_dict()), 200
 
-@app.route('/return_testline', methods=['POST'])
+@app.route('/api/return_testline', methods=['POST'])
 def return_testline():
     data = request.get_json()
     user_id = data.get('user_id')
@@ -85,13 +85,13 @@ def return_testline():
 
     return jsonify({'message': 'TestLine returned successfully'}), 200
 
-@app.route('/tools_details', methods=['GET'])
+@app.route('/api/tools_details', methods=['GET'])
 def get_tools_details():
     tools = Tool.query.all()
 
     return jsonify([tool.to_dict() for tool in tools]), 200
 
-@app.route('/add_tool', methods=['POST'])
+@app.route('/api/add_tool', methods=['POST'])
 def add_tool():
     data = request.get_json()
     app.logger.info(f'Received data for new tool: {data}')
@@ -121,7 +121,7 @@ def add_tool():
 
         
 
-@app.route('/update_tool/<int:tool_id>', methods=['PATCH'])
+@app.route('/api/update_tool/<int:tool_id>', methods=['PATCH'])
 def update_tool(tool_id):
     data = request.get_json()
 
@@ -154,7 +154,7 @@ def update_tool(tool_id):
     return jsonify(tool.to_dict()), 200
 
 
-@app.route('/tool_metrics/<int:tool_id>', methods=['DELETE'])
+@app.route('/api/tool_metrics/<int:tool_id>', methods=['DELETE'])
 def delete_tool(tool_id):
     # Get the session
     session = db.session
@@ -170,7 +170,7 @@ def delete_tool(tool_id):
         return jsonify({'error': 'tool not found'}), 404
     
 
-@app.route('/add_category', methods=['POST'])
+@app.route('/api/add_category', methods=['POST'])
 def add_category():
     data = request.get_json()
     app.logger.info(f'Received data for new tool: {data}')
@@ -195,14 +195,14 @@ def add_category():
     return jsonify(new_category.to_dict()), 200
 
 
-@app.route('/get_categories', methods=['GET'])
+@app.route('/api/get_categories', methods=['GET'])
 def fetch_categories():
     categories = Category.query.all()
 
     return jsonify([category.to_dict() for category in categories]), 200
 
 
-@app.route('/export/tools', methods=['GET'])
+@app.route('/api/export/tools', methods=['GET'])
 def export_tools():
     tools = Tool.query.all()
     tools_data = [
@@ -232,7 +232,7 @@ def export_tools():
     )
 
 
-@app.route('/import/tools', methods=['POST'])
+@app.route('/api/import/tools', methods=['POST'])
 def import_tools():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
