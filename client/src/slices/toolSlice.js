@@ -278,7 +278,7 @@ export const importTools = createAsyncThunk(
   'tools/importTools',
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/import/tools', {
+      const response = await fetch('/import/tools', {
         method: 'POST',
         body: formData,
       });

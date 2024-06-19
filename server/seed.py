@@ -29,6 +29,10 @@ def seed():
             'Printers', 'Keyboards', 'Mice'
         ]
         statuses = ['new', 'in use', 'storage', 'damaged', 'lost']
+        item_owners = ['Verizon', 'Nokia', 'AT&T']
+        storage_locations = ['US47-52000', 'US47-53000', 'US47-54000']
+        nokia_stos = ['SCE Project Return', 'DXC Return', 'NFL Stadium Deployment Return']
+        sites = ['Site1', 'Site2', 'Site3']
 
         # Create categories and tools
         for i, category_name in enumerate(categories, start=1):
@@ -39,11 +43,16 @@ def seed():
 
             for j in range(10):
                 tool = Tool(
-                    name=f'Tool {i * 10 + j + 1}',
-                    serial=f'{random.randint(10000, 99999)}',
-                    model=f'Model {chr(65 + j)}',
+                    serialNumber=f'L{random.randint(1000000000, 9999999999)}',
+                    productName=f'Product {i * 10 + j + 1}',
+                    productId=f'ID{random.randint(1000, 9999)}',
                     description=f'Description for Tool {i * 10 + j + 1}',
                     status=random.choice(statuses),
+                    siteId=random.choice(sites),
+                    storageLocation=random.choice(storage_locations),
+                    itemOwner=random.choice(item_owners),
+                    nokiaSto=random.choice(nokia_stos),
+                    notes=f'Notes for Tool {i * 10 + j + 1}',
                     category=category
                 )
                 db.session.add(tool)

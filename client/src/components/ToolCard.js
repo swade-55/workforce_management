@@ -9,20 +9,30 @@ const ToolCard = ({ tool, handleDelete }) => {
   const [editMode, setEditMode] = useState(false);
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Name is required'),
+    serialNumber: Yup.string().required('Serial Number is required'),
+    productName: Yup.string().required('Product Name is required'),
+    productId: Yup.string().required('Product ID is required'),
     description: Yup.string().required('Description is required'),
-    category: Yup.string().required('Category is required'),
+    siteId: Yup.string().required('Site ID is required'),
+    storageLocation: Yup.string().required('Storage Location is required'),
     status: Yup.string().required('Status is required'),
-    serial: Yup.string().required('Serial is required'),
+    itemOwner: Yup.string().required('Item Owner is required'),
+    nokiaSto: Yup.string().required('Nokia STO is required'),
+    notes: Yup.string().required('Notes are required'),
   });
 
   const formik = useFormik({
     initialValues: {
-      name: tool.name || '',
+      serialNumber: tool.serialNumber || '',
+      productName: tool.productName || '',
+      productId: tool.productId || '',
       description: tool.description || '',
-      category: tool.category.name || '',
+      siteId: tool.siteId || '',
+      storageLocation: tool.storageLocation || '',
       status: tool.status || '',
-      serial: tool.serial || '',
+      itemOwner: tool.itemOwner || '',
+      nokiaSto: tool.nokiaSto || '',
+      notes: tool.notes || '',
     },
     validationSchema,
     onSubmit: (values) => {
@@ -50,9 +60,25 @@ const ToolCard = ({ tool, handleDelete }) => {
             <input
               type="text"
               className="input input-bordered w-full"
-              {...formik.getFieldProps('name')}
+              {...formik.getFieldProps('serialNumber')}
             />
-            {formik.errors.name && <div className="text-error">{formik.errors.name}</div>}
+            {formik.errors.serialNumber && <div className="text-error">{formik.errors.serialNumber}</div>}
+          </td>
+          <td className="px-4 py-2">
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              {...formik.getFieldProps('productName')}
+            />
+            {formik.errors.productName && <div className="text-error">{formik.errors.productName}</div>}
+          </td>
+          <td className="px-4 py-2">
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              {...formik.getFieldProps('productId')}
+            />
+            {formik.errors.productId && <div className="text-error">{formik.errors.productId}</div>}
           </td>
           <td className="px-4 py-2">
             <input
@@ -66,9 +92,17 @@ const ToolCard = ({ tool, handleDelete }) => {
             <input
               type="text"
               className="input input-bordered w-full"
-              {...formik.getFieldProps('category')}
+              {...formik.getFieldProps('siteId')}
             />
-            {formik.errors.category && <div className="text-error">{formik.errors.category}</div>}
+            {formik.errors.siteId && <div className="text-error">{formik.errors.siteId}</div>}
+          </td>
+          <td className="px-4 py-2">
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              {...formik.getFieldProps('storageLocation')}
+            />
+            {formik.errors.storageLocation && <div className="text-error">{formik.errors.storageLocation}</div>}
           </td>
           <td className="px-4 py-2">
             <input
@@ -82,9 +116,25 @@ const ToolCard = ({ tool, handleDelete }) => {
             <input
               type="text"
               className="input input-bordered w-full"
-              {...formik.getFieldProps('serial')}
+              {...formik.getFieldProps('itemOwner')}
             />
-            {formik.errors.serial && <div className="text-error">{formik.errors.serial}</div>}
+            {formik.errors.itemOwner && <div className="text-error">{formik.errors.itemOwner}</div>}
+          </td>
+          <td className="px-4 py-2">
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              {...formik.getFieldProps('nokiaSto')}
+            />
+            {formik.errors.nokiaSto && <div className="text-error">{formik.errors.nokiaSto}</div>}
+          </td>
+          <td className="px-4 py-2">
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              {...formik.getFieldProps('notes')}
+            />
+            {formik.errors.notes && <div className="text-error">{formik.errors.notes}</div>}
           </td>
           <td className="px-4 py-2 text-center">
             <div className="flex justify-center space-x-2">
@@ -95,11 +145,16 @@ const ToolCard = ({ tool, handleDelete }) => {
         </>
       ) : (
         <>
-          <td className="px-4 py-2">{tool.name}</td>
+          <td className="px-4 py-2">{tool.serialNumber}</td>
+          <td className="px-4 py-2">{tool.productName}</td>
+          <td className="px-4 py-2">{tool.productId}</td>
           <td className="px-4 py-2">{tool.description}</td>
-          <td className="px-4 py-2">{tool.category.name}</td>
+          <td className="px-4 py-2">{tool.siteId}</td>
+          <td className="px-4 py-2">{tool.storageLocation}</td>
           <td className="px-4 py-2">{tool.status}</td>
-          <td className="px-4 py-2">{tool.serial}</td>
+          <td className="px-4 py-2">{tool.itemOwner}</td>
+          <td className="px-4 py-2">{tool.nokiaSto}</td>
+          <td className="px-4 py-2">{tool.notes}</td>
           <td className="px-4 py-2 text-center">
             <div className="flex justify-center space-x-2">
               <button onClick={() => setEditMode(true)} className="btn btn-primary">Edit</button>

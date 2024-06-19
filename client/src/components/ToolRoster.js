@@ -26,13 +26,16 @@ function ToolRoster() {
     }
   };
 
-  const filteredTools = tools.filter(tool => 
-    tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.serial.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTools = tools.filter(tool => {
+    const { name, description, category, status, serial } = tool;
+    return (
+      (name && name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (description && description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (category && category.name && category.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (status && status.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (serial && serial.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  });
 
   const toolsByCategory = filteredTools.reduce((acc, tool) => {
     const categoryKey = tool.category.id;
@@ -72,12 +75,17 @@ function ToolRoster() {
         <table className="table-auto w-full">
           <thead>
             <tr>
-              <th className="px-4 py-2 w-1/6">Name</th>
-              <th className="px-4 py-2 w-1/3">Description</th>
-              <th className="px-4 py-2 w-1/6">Category</th>
-              <th className="px-4 py-2 w-1/6">Status</th>
-              <th className="px-4 py-2 w-1/6">Serial</th>
-              <th className="px-4 py-2 text-center w-1/6">Actions</th> {/* Center-aligned */}
+              <th className="px-4 py-2">Serial Number</th>
+              <th className="px-4 py-2">Product Name</th>
+              <th className="px-4 py-2">Product ID</th>
+              <th className="px-4 py-2">Description</th>
+              <th className="px-4 py-2">Site ID</th>
+              <th className="px-4 py-2">Storage Location</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Item Owner</th>
+              <th className="px-4 py-2">Nokia STO</th>
+              <th className="px-4 py-2">Notes</th>
+              <th className="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>

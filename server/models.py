@@ -56,13 +56,16 @@ class Tool(db.Model, SerializerMixin):
     __tablename__ = 'tools'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    serial = db.Column(db.String)
-    model = db.Column(db.String)
-    description = db.Column(db.String)
-    status = db.Column(db.String)
+    serialNumber = db.Column(db.String)
+    productName = db.Column(db.String)
     productId = db.Column(db.String)
-    location = db.Column(db.String)
+    description = db.Column(db.String)
+    siteId = db.Column(db.String)
+    storageLocation = db.Column(db.String)
+    status = db.Column(db.String)
+    itemOwner = db.Column(db.String)
+    nokiaSto = db.Column(db.String)
+    notes = db.Column(db.String)
 
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
 
