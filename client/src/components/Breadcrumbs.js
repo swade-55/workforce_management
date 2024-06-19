@@ -17,9 +17,9 @@ const Breadcrumbs = () => {
   };
 
   return (
-    <div className="text-4xl mb-4">
+    <div style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
       {pathnames.length > 0 && (
-        <Link to="/" className="text-4xl hover:text-blue-600">Home</Link>
+        <Link to="/" style={{ fontSize: '1.25rem', color: '#1d4ed8', textDecoration: 'none' }}>Home</Link>
       )}
       {pathnames.map((value, index) => {
         const isLast = index === pathnames.length - 1;
@@ -27,14 +27,14 @@ const Breadcrumbs = () => {
         const displayName = displayNameMapping[value] || value;
 
         return isLast ? (
-          <span key={to} className="text-4xl">
+          <span key={to} style={{ fontSize: '1.25rem' }}>
             {' > '}
-            <span className="text-4xl">{displayName}</span>
+            <span style={{ fontSize: '1.25rem' }}>{displayName}</span>
           </span>
         ) : (
-          <span key={to} className="text-4xl">
+          <span key={to} style={{ fontSize: '1.25rem' }}>
             {' > '}
-            <Link to={to} className="text-4xl text-blue-600">{displayName}</Link>
+            <Link to={to} style={{ fontSize: '1.25rem', color: '#1d4ed8', textDecoration: 'none' }}>{displayName}</Link>
           </span>
         );
       })}

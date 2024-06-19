@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-
 const initialState = {
   tools: [],
-  categories:[],
+  categories: [],
   testlines: [],
   reservations: [],
   status: 'idle',
@@ -38,7 +37,7 @@ export const fetchTestLines = createAsyncThunk(
   'testlines/fetchTestLines',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/testlines'); // Adjust your endpoint
+      const response = await fetch('/api/testlines');
       if (!response.ok) throw new Error('Server error!');
       const data = await response.json();
       return data;
@@ -106,44 +105,47 @@ export const addTool = createAsyncThunk(
   async (toolData, { rejectWithValue }) => {
     try {
       const response = await fetch('/api/add_tool', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(toolData),
-});
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(toolData),
+      });
 
       if (!response.ok) throw new Error('Server error!');
-      const responseData =  await response.json();
+      const responseData = await response.json();
       return responseData;
     } catch (error) {
-      console.error('Error in addtool thunk:', error);
+      console.error('Error in addTool thunk:', error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-export const deleteTool = createAsyncThunk('/tools/deletetool', async(toolId, {rejectWithValue}) =>{
-  try {
-    const response = await fetch(`/api/tool_metrics/${toolId}`,{
-      method:'DELETE',
-    });
-    if (!response.ok){
-      throw new Error('Network response was not ok');
+export const deleteTool = createAsyncThunk(
+  'tools/deleteTool',
+  async (toolId, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/tool_metrics/${toolId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return toolId;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-    return toolId;
-  } catch(error){
-    return rejectWithValue(error.message);
   }
-})
+);
 
-export const fetchTools = createAsyncThunk('tools/fetchtools', async () => {
-  const url = `/api/tools_details`; 
+export const fetchTools = createAsyncThunk('tools/fetchTools', async () => {
+  const url = '/api/tools_details';
   const response = await fetch(url);
 
   if (!response.ok) {
     console.error(`HTTP error! status: ${response.status}`);
-    throw new Error('Could not fetch contacts');
+    throw new Error('Could not fetch tools');
   }
 
   const data = await response.json();
@@ -151,11 +153,9 @@ export const fetchTools = createAsyncThunk('tools/fetchtools', async () => {
 });
 
 export const updateTool = createAsyncThunk(
-  'tools/updatetool',
+  'tools/updateTool',
   async (toolData, { rejectWithValue }) => {
-    
     try {
-      
       const response = await fetch(`/api/update_tool/${toolData.toolId}`, {
         method: 'PATCH',
         headers: {
@@ -168,9 +168,9 @@ export const updateTool = createAsyncThunk(
         throw new Error('Server error!');
       }
 
-      const updatedtool = await response.json();
-      console.log('Received updated tool data:', updatedtool);
-      return updatedtool;
+      const updatedTool = await response.json();
+      console.log('Received updated tool data:', updatedTool);
+      return updatedTool;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -278,7 +278,7 @@ export const importTools = createAsyncThunk(
   'tools/importTools',
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/import/tools', {
+      const response = await fetch('/api/import/tools', {
         method: 'POST',
         body: formData,
       });
@@ -296,54 +296,46 @@ export const importTools = createAsyncThunk(
   }
 );
 
-
 const toolSlice = createSlice({
   name: 'tools',
   initialState,
   status: 'idle',
-  reducers: {
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(addTool.fulfilled, (state, action) => {
-        state.status='succeeded';
-        // state.tools = [...state.tools, action.payload];
-        state.tools.push(action.payload)
-        
+        state.status = 'succeeded';
+        state.tools.push(action.payload);
       })
       .addCase(addTool.rejected, (state, action) => {
-        // Handle the case where adding a tool fails
-        
         console.error('Failed to add tool:', action.payload);
       })
       .addCase(fetchTools.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        // return action.payload;
         state.tools = action.payload;
-        
       })
       .addCase(deleteTool.fulfilled, (state, action) => {
-        state.tools = state.tools.filter(tool => tool.id !== action.payload);
-      })      
+        state.tools = state.tools.filter((tool) => tool.id !== action.payload);
+      })
       .addCase(updateTool.rejected, (state, action) => {
         console.error('Failed to update tool:', action.payload);
       })
       .addCase(updateTool.fulfilled, (state, action) => {
-        const index = state.tools.findIndex(tool => tool.id === action.payload.id);
+        const index = state.tools.findIndex((tool) => tool.id === action.payload.id);
         if (index !== -1) {
           state.tools[index] = action.payload;
         } else {
-          console.warn("Updated tool not found in the array");
+          console.warn('Updated tool not found in the array');
         }
       })
       .addCase(addCategory.fulfilled, (state, action) => {
         state.categories.push(action.payload);
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.categories = state.categories.filter(category => category.id !== action.payload);
+        state.categories = state.categories.filter((category) => category.id !== action.payload);
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
-        const index = state.categories.findIndex(category => category.id === action.payload.id);
+        const index = state.categories.findIndex((category) => category.id === action.payload.id);
         if (index !== -1) {
           state.categories[index] = action.payload;
         }
@@ -356,24 +348,23 @@ const toolSlice = createSlice({
       })
       .addCase(importTools.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        // Add the imported tools to the state
-        state.tools = [...state.tools, ...action.payload];
+        state.tools = [...state.tools, ...action.payload]; // action.payload should be an array
       })
       .addCase(reserveTestLine.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.reservations.push(action.payload);
-        const testline = state.testlines.find(t => t.id === action.payload.testline_id);
+        const testline = state.testlines.find((t) => t.id === action.payload.testline_id);
         if (testline) {
           testline.status = 'checked out';
         }
       })
       .addCase(returnTestLine.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        const reservation = state.reservations.find(r => r.testline_id === action.payload.testline_id && !r.end_time);
+        const reservation = state.reservations.find((r) => r.testline_id === action.payload.testline_id && !r.end_time);
         if (reservation) {
           reservation.end_time = new Date().toISOString();
         }
-        const testline = state.testlines.find(t => t.id === action.payload.testline_id);
+        const testline = state.testlines.find((t) => t.id === action.payload.testline_id);
         if (testline) {
           testline.status = 'available';
         }
@@ -388,4 +379,3 @@ const toolSlice = createSlice({
 });
 
 export default toolSlice.reducer;
-

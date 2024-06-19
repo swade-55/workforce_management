@@ -108,9 +108,16 @@ def add_tool():
     # Creating or updating the tool
     new_tool = Tool(
         name=data.get('name'),
-        serial=data.get('serial'),
-        model=data.get('model'),
+        serialNumber=data.get('serial'),
+        productName=data.get('model'),
         description=data.get('description'),
+        status=data.get('status'),
+        productId=data.get('productId'),
+        siteId=data.get('siteId'),
+        storageLocation=data.get('storageLocation'),
+        itemOwner=data.get('itemOwner'),
+        nokiaSto=data.get('nokiaSto'),
+        notes=data.get('notes'),
         category_id=category_id
     )
 
@@ -119,33 +126,38 @@ def add_tool():
 
     return jsonify(new_tool.to_dict()), 200
 
+
+
         
 
 @app.route('/api/update_tool/<int:tool_id>', methods=['PATCH'])
 def update_tool(tool_id):
     data = request.get_json()
 
-    # Retrieve the tool to be updated
     tool = Tool.query.get(tool_id)
     if not tool:
         return jsonify({'error': 'Tool not found'}), 404
 
-    # Update basic tool details if provided
-    if 'name' in data:
-        tool.name = data['name']
-
-    if 'serial' in data:
-        tool.serial = data['serial']
-
+    if 'serialNumber' in data:
+        tool.serialNumber = data['serialNumber']
+    if 'productName' in data:
+        tool.productName = data['productName']
+    if 'productId' in data:
+        tool.productId = data['productId']
     if 'description' in data:
         tool.description = data['description']
-
-    if 'model' in data:
-        tool.model = data['model']
-
+    if 'siteId' in data:
+        tool.siteId = data['siteId']
+    if 'storageLocation' in data:
+        tool.storageLocation = data['storageLocation']
     if 'status' in data:
         tool.status = data['status']
-
+    if 'itemOwner' in data:
+        tool.itemOwner = data['itemOwner']
+    if 'nokiaSto' in data:
+        tool.nokiaSto = data['nokiaSto']
+    if 'notes' in data:
+        tool.notes = data['notes']
     if 'category_id' in data:
         tool.category_id = data['category_id']
 
@@ -209,13 +221,18 @@ def export_tools():
         {
             'ID': tool.id,
             'Name': tool.name,
-            'Description': tool.description,
-            'Category': tool.category.name if tool.category else None,
-            'Status': tool.status,
-            'Serial': tool.serial,
-            'Model': tool.model,
+            'Serial Number': tool.serialNumber,
+            'Product Name': tool.productName,
             'Product ID': tool.productId,
-            'Location': tool.location
+            'Description': tool.description,
+            'Site ID': tool.siteId,
+            'Storage Location': tool.storageLocation,
+            'Status': tool.status,
+            'Item Owner': tool.itemOwner,
+            'Nokia STO': tool.nokiaSto,
+            'Notes': tool.notes,
+            'Category ID': tool.category_id,
+            'Category': tool.category.name if tool.category else None
         }
         for tool in tools
     ]
@@ -235,44 +252,66 @@ def export_tools():
 @app.route('/api/import/tools', methods=['POST'])
 def import_tools():
     if 'file' not in request.files:
+        app.logger.error("No file part in the request")
         return jsonify({'error': 'No file part'}), 400
-    
+
     file = request.files['file']
     if file.filename == '':
+        app.logger.error("No selected file")
         return jsonify({'error': 'No selected file'}), 400
-    
+
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
-        
+
         try:
             # Read the Excel file
             df = pd.read_excel(file_path)
-            
+            app.logger.info(f"Read {len(df)} rows from the Excel file")
+
+            # Check required columns
+            required_columns = ['Name', 'Serial Number', 'Product Name', 'Product ID', 'Description', 'Site ID', 'Storage Location', 'Status', 'Item Owner', 'Nokia STO', 'Notes', 'Category ID']
+            for column in required_columns:
+                if column not in df.columns:
+                    raise ValueError(f"Missing required column: {column}")
+
+            imported_tools = []
+
             # Process the DataFrame and insert into the database
             for index, row in df.iterrows():
                 tool = Tool(
                     name=row['Name'],
-                    description=row['Description'],
-                    category_id=row['Category ID'],
-                    status=row['Status'],
-                    serial=row['Serial'],
-                    model=row['Model'],
+                    serialNumber=row['Serial Number'],
+                    productName=row['Product Name'],
                     productId=row['Product ID'],
-                    location=row['Location']
+                    description=row['Description'],
+                    siteId=row['Site ID'],
+                    storageLocation=row['Storage Location'],
+                    status=row['Status'],
+                    itemOwner=row['Item Owner'],
+                    nokiaSto=row['Nokia STO'],
+                    notes=row['Notes'],
+                    category_id=row['Category ID']
                 )
                 db.session.add(tool)
+                imported_tools.append(tool)
             db.session.commit()
-            return jsonify({'message': 'Data imported successfully'}), 200
+
+            imported_tools_data = [tool.to_dict() for tool in imported_tools]
+
+            app.logger.info("Data imported successfully")
+            return jsonify(imported_tools_data), 200
         except Exception as e:
+            app.logger.error(f"Error importing data: {str(e)}")
             return jsonify({'error': str(e)}), 500
     else:
+        app.logger.error("Invalid file format")
         return jsonify({'error': 'Invalid file format'}), 400
-
+    
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'xlsx'}
-
+    ALLOWED_EXTENSIONS = {'xlsx'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 if __name__=='__main__':

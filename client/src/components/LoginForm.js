@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { loginUser } from '../slices/authSlice';
-import { fetchTools } from '../slices/toolSlice'
+import { fetchCategories, fetchTools } from '../slices/toolSlice'
 
 
 const LoginForm = () => {
@@ -26,8 +26,9 @@ const LoginForm = () => {
       .unwrap()
       .then((user) => {
         console.log('Login Success:', user);
-        navigate('/layout'); 
+        navigate('/'); 
         dispatch(fetchTools());
+        dispatch(fetchCategories())
       })
       .catch((error) => {
         console.error('Error:', error);

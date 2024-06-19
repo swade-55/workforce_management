@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ba055c16f47b
+Revision ID: f146cc0a6f54
 Revises: 
-Create Date: 2024-06-11 11:28:08.187457
+Create Date: 2024-06-19 16:22:36.110658
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ba055c16f47b'
+revision = 'f146cc0a6f54'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -55,13 +55,17 @@ def upgrade():
     )
     op.create_table('tools',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('serial', sa.String(), nullable=True),
-    sa.Column('model', sa.String(), nullable=True),
-    sa.Column('description', sa.String(), nullable=True),
-    sa.Column('status', sa.String(), nullable=True),
+    sa.Column('name', sa.String(length=80), nullable=False),
+    sa.Column('serialNumber', sa.String(), nullable=True),
+    sa.Column('productName', sa.String(), nullable=True),
     sa.Column('productId', sa.String(), nullable=True),
-    sa.Column('location', sa.String(), nullable=True),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('siteId', sa.String(), nullable=True),
+    sa.Column('storageLocation', sa.String(), nullable=True),
+    sa.Column('status', sa.String(), nullable=True),
+    sa.Column('itemOwner', sa.String(), nullable=True),
+    sa.Column('nokiaSto', sa.String(), nullable=True),
+    sa.Column('notes', sa.String(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')

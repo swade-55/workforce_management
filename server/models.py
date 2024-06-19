@@ -56,6 +56,7 @@ class Tool(db.Model, SerializerMixin):
     __tablename__ = 'tools'
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
     serialNumber = db.Column(db.String)
     productName = db.Column(db.String)
     productId = db.Column(db.String)
