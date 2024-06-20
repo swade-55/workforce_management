@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { deleteTool, updateTool } from '../slices/toolSlice';
+import { updateTool } from '../slices/toolSlice';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 const ToolCard = ({ tool, handleDelete }) => {
   const dispatch = useDispatch();
+  const [showFullNotes, setShowFullNotes] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
   const validationSchema = Yup.object({
@@ -18,7 +19,7 @@ const ToolCard = ({ tool, handleDelete }) => {
     status: Yup.string().required('Status is required'),
     itemOwner: Yup.string().required('Item Owner is required'),
     nokiaSto: Yup.string().required('Nokia STO is required'),
-    notes: Yup.string().required('Notes are required'),
+    notes: Yup.string(),
   });
 
   const formik = useFormik({
@@ -51,6 +52,10 @@ const ToolCard = ({ tool, handleDelete }) => {
         });
     },
   });
+
+  const toggleNotes = () => {
+    setShowFullNotes(!showFullNotes);
+  };
 
   return (
     <tr>
@@ -145,20 +150,23 @@ const ToolCard = ({ tool, handleDelete }) => {
         </>
       ) : (
         <>
-          <td className="px-4 py-2">{tool.serialNumber}</td>
-          <td className="px-4 py-2">{tool.productName}</td>
-          <td className="px-4 py-2">{tool.productId}</td>
-          <td className="px-4 py-2">{tool.description}</td>
-          <td className="px-4 py-2">{tool.siteId}</td>
-          <td className="px-4 py-2">{tool.storageLocation}</td>
-          <td className="px-4 py-2">{tool.status}</td>
-          <td className="px-4 py-2">{tool.itemOwner}</td>
-          <td className="px-4 py-2">{tool.nokiaSto}</td>
-          <td className="px-4 py-2">{tool.notes}</td>
-          <td className="px-4 py-2 text-center">
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.serialNumber}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.productName}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.productId}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.description}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.siteId}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.storageLocation}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.status}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.itemOwner}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.nokiaSto}</td>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>
+            {showFullNotes ? tool.notes : ''}
+            <button onClick={toggleNotes} className="ml-2 btn btn-xs btn-info">{showFullNotes ? 'Hide' : 'Show'}</button>
+          </td>
+          <td className="py-2 px-4 border-b border-gray-200 text-center">
             <div className="flex justify-center space-x-2">
               <button onClick={() => setEditMode(true)} className="btn btn-primary">Edit</button>
-              <button onClick={() => handleDelete(tool.id)} className="btn btn-error">Delete</button>
+              <button onClick={handleDelete} className="btn btn-error">Delete</button>
             </div>
           </td>
         </>

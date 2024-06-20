@@ -100,6 +100,7 @@ export const returnTestLine = createAsyncThunk(
 );
 
 // Async thunk action for adding a tool
+// Async thunk action for adding a tool
 export const addTool = createAsyncThunk(
   'tools/addTool',
   async (toolData, { rejectWithValue }) => {
@@ -112,15 +113,19 @@ export const addTool = createAsyncThunk(
         body: JSON.stringify(toolData),
       });
 
-      if (!response.ok) throw new Error('Server error!');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Server error!');
+      }
+
       const responseData = await response.json();
       return responseData;
     } catch (error) {
-      console.error('Error in addTool thunk:', error);
       return rejectWithValue(error.message);
     }
   }
 );
+
 
 export const deleteTool = createAsyncThunk(
   'tools/deleteTool',
@@ -299,16 +304,21 @@ export const importTools = createAsyncThunk(
 const toolSlice = createSlice({
   name: 'tools',
   initialState,
-  status: 'idle',
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(addTool.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.tools.push(action.payload);
+        state.error = null; // Clear any previous error
       })
       .addCase(addTool.rejected, (state, action) => {
-        console.error('Failed to add tool:', action.payload);
+        state.status = 'failed';
+        state.error = action.payload;
       })
       .addCase(fetchTools.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -377,5 +387,7 @@ const toolSlice = createSlice({
       });
   },
 });
+
+export const { clearError } = toolSlice.actions;
 
 export default toolSlice.reducer;

@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { addTool } from '../slices/toolSlice';
+import { addTool, clearError } from '../slices/toolSlice';
 import * as Yup from 'yup';
 
 function ToolForm({ onClose }) {
   const dispatch = useDispatch();
   const uniqueCategories = useSelector(state => state.tools.categories);
+  const error = useSelector(state => state.tools.error);
+  const [serverError, setServerError] = useState('');
+
+  useEffect(() => {
+    if (error) {
+      setServerError(error);
+    }
+  }, [error]);
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
@@ -20,7 +28,7 @@ function ToolForm({ onClose }) {
     storageLocation: Yup.string().required('Storage Location is required'),
     itemOwner: Yup.string().required('Item Owner is required'),
     nokiaSto: Yup.string().required('Nokia STO is required'),
-    notes: Yup.string().required('Notes are required'),
+    notes: Yup.string(), // Changed from required to optional
   });
 
   const uniqueStatus = ['New', 'In Use', 'Storage', 'Damaged', 'Lost'];
@@ -41,6 +49,7 @@ function ToolForm({ onClose }) {
   };
 
   const onSubmit = (values, { setSubmitting, resetForm }) => {
+    setServerError(''); // Clear any previous error
     const payload = {
       name: values.name,
       category_id: parseInt(values.category_id, 10),
@@ -57,18 +66,41 @@ function ToolForm({ onClose }) {
     };
 
     dispatch(addTool(payload))
+      .unwrap()
       .then(() => {
         onClose();
         resetForm();
+      })
+      .catch((error) => {
+        setServerError(error);
       })
       .finally(() => {
         setSubmitting(false);
       });
   };
 
+  const handleCloseError = () => {
+    setServerError('');
+    dispatch(clearError());
+  };
+
   return (
     <div className="p-4 bg-base-100">
       <h3 className="text-lg font-semibold">Add a New Tool</h3>
+      {serverError && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-xl mb-4">Error</h2>
+            <p>{serverError}</p>
+            <button
+              className="btn btn-primary mt-4"
+              onClick={handleCloseError}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({ isSubmitting, setFieldValue }) => (
           <Form className="form-control w-full max-w-lg mx-auto">

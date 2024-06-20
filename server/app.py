@@ -96,6 +96,11 @@ def add_tool():
     data = request.get_json()
     app.logger.info(f'Received data for new tool: {data}')
 
+    # Check if serial number already exists
+    existing_tool = Tool.query.filter_by(serialNumber=data.get('serial')).first()
+    if existing_tool:
+        return jsonify({'error': 'Serial number already exists'}), 400
+
     # Handling Category
     category_id = data.get('category_id')
     if not category_id:

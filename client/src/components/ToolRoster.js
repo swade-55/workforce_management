@@ -59,18 +59,6 @@ function ToolRoster() {
     );
   });
 
-  const toolsByCategory = filteredTools.reduce((acc, tool) => {
-    const categoryKey = tool.category ? tool.category.id : 'Uncategorized';
-    if (!acc[categoryKey]) {
-      acc[categoryKey] = {
-        tools: [],
-        categoryName: tool.category ? tool.category.name : 'Uncategorized'
-      };
-    }
-    acc[categoryKey].tools.push(tool);
-    return acc;
-  }, {});
-
   return (
     // <SidebarLayout>
       <div className="w-full p-4">
@@ -95,7 +83,7 @@ function ToolRoster() {
         </div>
         <button onClick={() => setIsModalOpen(true)} className="btn btn-primary mb-4">Add New Asset</button>
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-          <table className="min-w-full bg-white">
+          <table className="min-w-full bg-white" style={{ tableLayout: 'fixed', width: '100%' }}>
             <thead className="bg-gray-50">
               <tr>
                 <th className="py-2 px-4 border-b border-gray-200">Serial Number</th>
