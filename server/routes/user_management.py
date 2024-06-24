@@ -73,8 +73,7 @@ def fetch_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users]), 200
 
-
-@app.route('/api/users', methods=['POST'])
+@app.route('/api/create_user', methods=['POST'])
 def create_user():
     data = request.json
     username = data.get('username')
@@ -90,9 +89,7 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
 
-    # return jsonify(new_user.to_dict()), 201
-    return jsonify({"message": "Session valid", "user_id": new_user.id}), 201
-
+    return jsonify({"message": "User created successfully", "user_id": new_user.id}), 201
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -101,18 +98,14 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
         session['user_id'] = user.id
-        return jsonify({"message": "Login successful", "user_id": user.id}), 200
+        return jsonify({"message": "Login successful", "user": user.to_dict()}), 200
     else:
         return jsonify({"message": "Invalid username or password"}), 401
-
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({"message": "Logged out successfully"}), 200
-
-
-
 
 @app.route('/api/check_session', methods=['GET'])
 def check_session():
@@ -120,10 +113,9 @@ def check_session():
     if user_id:
         user = User.query.get(user_id)
         if user:
-            return jsonify({"message": "Session valid", "user_id": user.id}), 200
+            return jsonify({"message": "Session valid", "user": user.to_dict(), "isAuthenticated": True}), 200
         else:
-            # If no user is found for the user_id, it could mean the user has been deleted
-            session.pop('user_id', None)  # Clear the session to handle this edge case
+            session.pop('user_id', None)
             return jsonify({"message": "Session invalid"}), 401
     else:
         return jsonify({"message": "Session invalid"}), 401

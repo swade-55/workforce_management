@@ -45,7 +45,7 @@ const TestLineForm = ({ onClose }) => {
             </label>
             <Field as="select" name="status" className="select select-bordered w-full max-w-xs">
               <option value="available">Available</option>
-              <option value="checked out">Checked Out</option>
+              {/* <option value="checked out">Checked Out</option> */}
             </Field>
             <ErrorMessage name="status" component="div" className="text-error" />
 

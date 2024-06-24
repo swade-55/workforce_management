@@ -83,6 +83,10 @@ class TestLine(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     status = db.Column(db.String, default='available')
+    checked_out_by = db.Column(db.String)  # Stores the username of the user who checked out the test line
+    checked_out_time = db.Column(db.DateTime)
+    returned_by = db.Column(db.String)  # Stores the username of the user who returned the test line
+    returned_time = db.Column(db.DateTime)  # Stores the return time of the test line
 
     reservations = db.relationship('Reservation', back_populates='testline')
 
@@ -94,6 +98,8 @@ class Reservation(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
     end_time = db.Column(db.DateTime, nullable=True)
+    returned_by = db.Column(db.String, nullable=True)  # New field for returned by
+    returned_time = db.Column(db.DateTime, nullable=True)
     
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     testline_id = db.Column(db.Integer, db.ForeignKey('testlines.id'))

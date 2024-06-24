@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../slices/authSlice';
 import Breadcrumbs from './Breadcrumbs';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const SidebarLayout = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const auth = useSelector((state) => state.auth);
+  console.log('this is auth for sidebar layout', auth)
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -16,6 +19,10 @@ const SidebarLayout = () => {
         navigate('/login');
       })
       .catch((error) => console.error('Logout failed', error));
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
   };
 
   return (
@@ -38,17 +45,52 @@ const SidebarLayout = () => {
         <nav>
           <ul style={{ listStyleType: 'none', padding: '0', margin: '0' }}>
             <li style={{ borderBottom: '1px solid #2d3748' }}>
-              <Link
-                to="/masteroperatingplan"
+              <div
+                onClick={toggleDropdown}
                 style={{
                   display: 'block',
                   padding: '0.75rem 1rem',
                   color: '#fff',
-                  textDecoration: 'none'
+                  background: 'none',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  cursor: 'pointer'
                 }}
               >
-                Manage All Tools
-              </Link>
+                Assets/Stock
+                <span style={{ float: 'right' }}>{isDropdownOpen ? '▲' : '▼'}</span>
+              </div>
+              {isDropdownOpen && (
+                <ul style={{ listStyleType: 'none', padding: '0', margin: '0' }}>
+                  <li style={{ borderBottom: '1px solid #2d3748' }}>
+                    <Link
+                      to="/asset-container"
+                      style={{
+                        display: 'block',
+                        padding: '0.75rem 1rem',
+                        color: '#fff',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      Asset Container
+                    </Link>
+                  </li>
+                  <li style={{ borderBottom: '1px solid #2d3748' }}>
+                    <Link
+                      to="/stock-container"
+                      style={{
+                        display: 'block',
+                        padding: '0.75rem 1rem',
+                        color: '#fff',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      Stock Container
+                    </Link>
+                  </li>
+                </ul>
+              )}
             </li>
             <li style={{ borderBottom: '1px solid #2d3748' }}>
               <Link
@@ -102,7 +144,7 @@ const SidebarLayout = () => {
         <header style={{ backgroundColor: '#f3f4f6', padding: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 style={{ fontSize: '2xl', fontWeight: 'bold' }}>Dashboard</h1>
-            <div style={{ color: '#4b5563' }}>Nokia</div>
+            <div style={{ color: '#4b5563' }}>Welcome {auth.user.username}!</div>
           </div>
         </header>
         <main style={{ padding: '1rem' }}>

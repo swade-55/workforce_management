@@ -159,9 +159,15 @@ const ToolCard = ({ tool, handleDelete }) => {
           <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.status}</td>
           <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.itemOwner}</td>
           <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>{tool.nokiaSto}</td>
-          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word' }}>
+          <td className="py-2 px-4 border-b border-gray-200" style={{ wordWrap: 'break-word', position: 'relative' }}>
             {showFullNotes ? tool.notes : ''}
-            <button onClick={toggleNotes} className="ml-2 btn btn-xs btn-info">{showFullNotes ? 'Hide' : 'Show'}</button>
+            <button 
+              onClick={toggleNotes} 
+              className="ml-2 btn btn-xs btn-info"
+              style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-50%)' }}
+            >
+              {showFullNotes ? 'Hide' : 'Show'}
+            </button>
           </td>
           <td className="py-2 px-4 border-b border-gray-200 text-center">
             <div className="flex justify-center space-x-2">

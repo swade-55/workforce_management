@@ -12,16 +12,25 @@ from collections import defaultdict
 from datetime import datetime
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-
+import pytz
 from routes.routes import *
 
 import pandas as pd
 from io import BytesIO
 
+central = pytz.timezone('America/Chicago')
+
+def convert_to_central(utc_dt):
+    if utc_dt is None:
+        return None
+    utc_dt = pytz.utc.localize(utc_dt)
+    return utc_dt.astimezone(central).strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
 @app.route('/api/testlines', methods=['GET'])
 def get_testlines():
     testlines = TestLine.query.all()
     return jsonify([testline.to_dict() for testline in testlines]), 200
+
 
 @app.route('/api/add_testline', methods=['POST'])
 def add_testline():
@@ -50,23 +59,36 @@ def reserve_testline():
     if not user or not testline:
         return jsonify({'error': 'User or TestLine not found'}), 404
 
-    # Check if testline is already reserved by the same user
     existing_reservation = Reservation.query.filter_by(user_id=user_id, testline_id=testline_id, end_time=None).first()
     if existing_reservation:
         return jsonify({'error': 'TestLine already reserved by this user'}), 400
 
-    # Check if testline is available
     if testline.status != 'available':
         return jsonify({'error': 'TestLine is not available'}), 400
 
-    # Create a new reservation
     reservation = Reservation(user_id=user_id, testline_id=testline_id)
     testline.status = 'checked out'
+    testline.checked_out_by = user.username
+    testline.checked_out_time = datetime.utcnow()  # Use UTC time
 
     db.session.add(reservation)
     db.session.commit()
 
-    return jsonify(reservation.to_dict()), 200
+    reservation_dict = reservation.to_dict()
+    reservation_dict['start_time'] = convert_to_central(reservation.start_time)
+    reservation_dict['end_time'] = convert_to_central(reservation.end_time)
+    reservation_dict['returned_time'] = convert_to_central(reservation.returned_time)
+
+    testline_dict = testline.to_dict()
+    testline_dict['checked_out_time'] = convert_to_central(testline.checked_out_time)
+    testline_dict['returned_time'] = convert_to_central(testline.returned_time)
+
+    return jsonify({
+        'reservation': reservation_dict,
+        'testline': testline_dict,
+        'user': user.to_dict()
+    }), 200
+
 
 @app.route('/api/return_testline', methods=['POST'])
 def return_testline():
@@ -79,11 +101,31 @@ def return_testline():
         return jsonify({'error': 'Reservation not found'}), 404
 
     reservation.end_time = datetime.utcnow()
+    reservation.returned_by = User.query.get(user_id).username
+    reservation.returned_time = datetime.utcnow()
     reservation.testline.status = 'available'
+    reservation.testline.checked_out_by = None
+    reservation.testline.checked_out_time = None
 
     db.session.commit()
 
-    return jsonify({'message': 'TestLine returned successfully'}), 200
+    reservation_dict = reservation.to_dict()
+    reservation_dict['start_time'] = convert_to_central(reservation.start_time)
+    reservation_dict['end_time'] = convert_to_central(reservation.end_time)
+    reservation_dict['returned_time'] = convert_to_central(reservation.returned_time)
+
+    testline_dict = reservation.testline.to_dict()
+    testline_dict['checked_out_time'] = convert_to_central(reservation.testline.checked_out_time)
+    testline_dict['returned_time'] = convert_to_central(reservation.testline.returned_time)
+
+    return jsonify({
+        'reservation': reservation_dict,
+        'testline': testline_dict,
+        'user': reservation.user.to_dict()
+    }), 200
+
+
+
 
 @app.route('/api/tools_details', methods=['GET'])
 def get_tools_details():
@@ -320,4 +362,5 @@ def allowed_file(filename):
 
 
 if __name__=='__main__':
-    app.run(port=5555,debug=True)
+    app.run(port=5000,debug=True)
+

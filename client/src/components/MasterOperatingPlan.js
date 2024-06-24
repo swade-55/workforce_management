@@ -1,8 +1,8 @@
 import React from 'react';
-import ToolRoster from './ToolRoster';
+import AssetContainer from './AssetContainer';
 
 function MasterOperatingPlan() {
-  return <ToolRoster />;
+  return <AssetContainer />;
 }
 
 export default MasterOperatingPlan;

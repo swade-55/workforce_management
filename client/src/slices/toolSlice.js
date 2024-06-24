@@ -66,13 +66,14 @@ export const reserveTestLine = createAsyncThunk(
         throw new Error(data.error || 'Failed to reserve testline');
       }
 
-      const reservation = await response.json();
-      return reservation;
+      const data = await response.json();
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+
 
 export const returnTestLine = createAsyncThunk(
   'tools/returnTestLine',
@@ -91,13 +92,14 @@ export const returnTestLine = createAsyncThunk(
         throw new Error(data.error || 'Failed to return testline');
       }
 
-      const message = await response.json();
-      return { testline_id, message };
+      const data = await response.json();
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+
 
 // Async thunk action for adding a tool
 // Async thunk action for adding a tool
@@ -360,23 +362,22 @@ const toolSlice = createSlice({
         state.status = 'succeeded';
         state.tools = [...state.tools, ...action.payload]; // action.payload should be an array
       })
+      .addCase(importTools.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
       .addCase(reserveTestLine.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.reservations.push(action.payload);
-        const testline = state.testlines.find((t) => t.id === action.payload.testline_id);
+        const testline = state.testlines.find((t) => t.id === action.payload.testline.id);
         if (testline) {
-          testline.status = 'checked out';
+          Object.assign(testline, action.payload.testline);
         }
       })
       .addCase(returnTestLine.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        const reservation = state.reservations.find((r) => r.testline_id === action.payload.testline_id && !r.end_time);
-        if (reservation) {
-          reservation.end_time = new Date().toISOString();
-        }
-        const testline = state.testlines.find((t) => t.id === action.payload.testline_id);
+        const testline = state.testlines.find(t => t.id === action.payload.testline.id);
         if (testline) {
-          testline.status = 'available';
+          Object.assign(testline, action.payload.testline);
         }
       })
       .addCase(addTestLine.fulfilled, (state, action) => {
@@ -384,10 +385,12 @@ const toolSlice = createSlice({
       })
       .addCase(fetchTestLines.fulfilled, (state, action) => {
         state.testlines = action.payload;
-      });
+      })
+      ;
   },
 });
 
 export const { clearError } = toolSlice.actions;
 
 export default toolSlice.reducer;
+

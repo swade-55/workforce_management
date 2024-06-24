@@ -5,6 +5,7 @@ import { fetchTools, fetchCategories } from '../slices/toolSlice'; // Adjust the
 function ExecutiveSummary() {
   const dispatch = useDispatch();
   const tools = useSelector(state => state.tools.tools);
+  console.log('tools', tools)
   const categories = useSelector(state=>state.tools.categories)
   console.log('categories', categories)
 

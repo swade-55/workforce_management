@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { reserveTestLine, returnTestLine, fetchTestLines } from '../slices/toolSlice'; // Adjust import path as necessary
 import TestLineForm from './TestLineForm'; // Import the TestLineForm
 import SidebarLayout from './SidebarLayout';
+import { checkSession } from "../slices/authSlice";
 
 function ManageTestLines() {
   const dispatch = useDispatch();
@@ -13,14 +14,25 @@ function ManageTestLines() {
 
   useEffect(() => {
     dispatch(fetchTestLines());
+    dispatch(checkSession());
   }, [dispatch]);
 
   const handleReserve = (testline_id) => {
-    dispatch(reserveTestLine({ user_id: auth.user.id, testline_id }));
+    if (auth.user && auth.user.id) {
+      dispatch(reserveTestLine({ user_id: auth.user.id, testline_id }));
+    } else {
+      console.error('User is not authenticated');
+      alert('You must be logged in to reserve a test line.');
+    }
   };
 
   const handleReturn = (testline_id) => {
-    dispatch(returnTestLine({ user_id: auth.user.id, testline_id }));
+    if (auth.user && auth.user.id) {
+      dispatch(returnTestLine({ user_id: auth.user.id, testline_id }));
+    } else {
+      console.error('User is not authenticated');
+      alert('You must be logged in to return a test line.');
+    }
   };
 
   const filteredTestLines = testlines.filter(testline => 
@@ -34,6 +46,19 @@ function ManageTestLines() {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const formatCentralTime = (utcTime) => {
+    const options = {
+      timeZone: 'America/Chicago', // Central Time Zone
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(utcTime));
   };
 
   return (
@@ -53,10 +78,10 @@ function ManageTestLines() {
           <table className="table-auto w-full">
             <thead>
               <tr>
-                <th className="px-4 py-2 w-1/4">Name</th>
-                <th className="px-4 py-2 w-1/4">Status</th>
-                <th className="px-4 py-2 w-1/4">Reserve</th>
-                <th className="px-4 py-2 w-1/4">Return</th>
+                <th className="px-4 py-2 w-1/5">Name</th>
+                <th className="px-4 py-2 w-1/5">Status</th>
+                <th className="px-4 py-2 w-2/5">Details</th>
+                <th className="px-4 py-2 w-1/5">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -64,23 +89,41 @@ function ManageTestLines() {
                 <tr key={testline.id}>
                   <td className="border px-4 py-2">{testline.name}</td>
                   <td className="border px-4 py-2">{testline.status}</td>
-                  <td className="border px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleReserve(testline.id)}
-                      className="btn btn-primary"
-                      disabled={testline.status !== 'available'}
-                    >
-                      Reserve
-                    </button>
+                  <td className="border px-4 py-2">
+                    {testline.checked_out_by && (
+                      <>
+                        <p>Checked out by: {testline.checked_out_by}</p>
+                        <p>Checked out time: {formatCentralTime(testline.checked_out_time)}</p>
+                      </>
+                    )}
+                    {testline.returned_by && (
+                      <>
+                        <p>Returned by: {testline.returned_by}</p>
+                        <p>Returned time: {formatCentralTime(testline.returned_time)}</p>
+                      </>
+                    )}
                   </td>
                   <td className="border px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleReturn(testline.id)}
-                      className="btn btn-secondary"
-                      disabled={testline.status !== 'checked out'}
-                    >
-                      Return
-                    </button>
+                    {auth.isAuthenticated && auth.user ? (
+                      <>
+                        <button
+                          onClick={() => handleReserve(testline.id)}
+                          className="btn btn-primary"
+                          disabled={testline.status !== 'available'}
+                        >
+                          Reserve
+                        </button>
+                        <button
+                          onClick={() => handleReturn(testline.id)}
+                          className="btn btn-secondary ml-2"
+                          disabled={testline.status !== 'checked out'}
+                        >
+                          Return
+                        </button>
+                      </>
+                    ) : (
+                      <p>Please log in to manage test lines</p>
+                    )}
                   </td>
                 </tr>
               ))}

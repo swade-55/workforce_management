@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { fetchTools, fetchCategories } from '../slices/toolSlice';
+import { fetchTools, fetchCategories, fetchTestLines } from '../slices/toolSlice';
 import { checkSession } from '../slices/authSlice';
 import LandingPage from './LandingPage';
 import LoginForm from './LoginForm';
@@ -11,16 +11,20 @@ import MasterOperatingPlan from './MasterOperatingPlan';
 import ExecutiveSummary from './ExecutiveSummary';
 import ManageTestLines from './ManageTestLines';
 import ManageUsers from './ManageUsers'; // Import ManageUsers
+import AssetContainer from './AssetContainer';
+import StockContainer from './StockContainer';
 
 function App() {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
+  console.log('this is app auth', auth)
 
   useEffect(() => {
     dispatch(checkSession()).then((action) => {
       if (action.type.endsWith('fulfilled')) {
         dispatch(fetchTools());
         dispatch(fetchCategories());
+        dispatch(fetchTestLines());
       }
     });
   }, [dispatch]);
@@ -43,6 +47,8 @@ function App() {
               <Route path="manage-users" element={<ManageUsers />} />
             )}
             <Route path="/" element={<ExecutiveSummary />} />
+            <Route path="/asset-container" element={<AssetContainer />} />
+          <Route path="/stock-container" element={<StockContainer />} />
           </Route>
         )}
       </Routes>

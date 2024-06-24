@@ -8,11 +8,11 @@ export const loginUser = createAsyncThunk(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
-        credentials: 'include', 
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Login failed');
       const data = await response.json();
-      return data; 
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -20,26 +20,26 @@ export const loginUser = createAsyncThunk(
 );
 
 export const checkSession = createAsyncThunk('auth/checkSession', async (_, thunkAPI) => {
-    try {
-      const response = await fetch('/api/check_session', { credentials: 'include' });
-      const data = await response.json();
-      if (response.ok) {
-        return { isAuthenticated: true, user: data.user };
-      } else {
-        return thunkAPI.rejectWithValue(data);
-      }
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+  try {
+    const response = await fetch('/api/check_session', { credentials: 'include' });
+    const data = await response.json();
+    if (response.ok && data.isAuthenticated) {
+      return { isAuthenticated: true, user: data.user };
+    } else {
+      return thunkAPI.rejectWithValue(data);
     }
-  });
-  
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.message);
+  }
+});
+
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, thunkAPI) => {
-    try {
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-      return { isAuthenticated: false };
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
+  try {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    return { isAuthenticated: false };
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
 export const fetchUsers = createAsyncThunk(
@@ -59,14 +59,17 @@ export const fetchUsers = createAsyncThunk(
 
 export const addUser = createAsyncThunk(
   'auth/addUser',
-  async (userData, { rejectWithValue }) => {
+  async (userData, { rejectWithValue, getState }) => {
     try {
+      const state = getState();
+      const adminId = state.auth.user.id;  // Assuming the logged-in user is the admin
+
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, admin_id: adminId }),
       });
       if (!response.ok) throw new Error('Server error!');
       const data = await response.json();
@@ -77,6 +80,7 @@ export const addUser = createAsyncThunk(
     }
   }
 );
+
 
 export const deleteUser = createAsyncThunk(
   'auth/deleteUser',
@@ -103,7 +107,7 @@ const initialState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
-  users: [],
+  users: [], // Ensure users is initialized as an array
   userStatus: 'idle',
 };
 
@@ -129,6 +133,11 @@ const authSlice = createSlice({
       .addCase(checkSession.fulfilled, (state, action) => {
         state.isAuthenticated = action.payload.isAuthenticated;
         state.user = action.payload.user;
+      })
+      .addCase(checkSession.rejected, (state, action) => {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = action.payload;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;

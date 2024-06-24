@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers, addUser, deleteUser } from '../slices/authSlice'; // Adjust the import path
+import { fetchUsers, addUser, deleteUser } from '../slices/authSlice';
 
 const ManageUsers = () => {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.users.users);
+  const users = useSelector((state) => state.auth.users);
+  const admin = useSelector((state) => state.auth.user);  // Assuming the logged-in user is the admin
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', role: 'user', can_manage_tools: false, can_manage_testlines: false });
 
   useEffect(() => {
